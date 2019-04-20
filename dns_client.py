@@ -12,7 +12,7 @@ def read_config():
     parser = configargparse.ArgumentParser(prog='dns_client')
 
     parser.add_argument('-u', '--url', dest="url", action="store", env_var="DNSCLIENT_URL", required=True)
-    parser.add_argument('-r', '--record', dest="record", action="store", env_var="DNSCLIENT_HOST", required=True)
+    parser.add_argument('-r', '--record', dest="record", action="store", env_var="DNSCLIENT_RECORD", required=True)
     parser.add_argument('-s', '--secret', dest="shared_secret", action="store", env_var="DNSCLIENT_SECRET", required=True)
     parser.add_argument('--debug', dest="debug", action="store_true", env_var="DNSCLIENT_DEBUG", default=False)
     parser.add_argument('--prometheus_port', dest='promport', action="store", env_var="DNSCLIENT_PROMPORT", type=int, default=8000)
