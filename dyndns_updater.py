@@ -9,12 +9,12 @@ from prometheus_client import Counter, Gauge
 
 
 class DyndnsUpdater:
-    prom_backends_status = Counter('dnsclient_backends_http_status', 'HTTP code of backend calls', ['site', 'status'])
-    prom_backends_fetching_ip_failed = Counter('dnsclient_backends_fetching_ip_failed', 'Fetching IP failed')
-    prom_last_check = Gauge('dnsclient_update_last_check_timestamp_seconds', 'Timestamp of the latest check for a new IP')
-    prom_update_detected = Counter('dnsclient_update_detected_total', 'Amount of IP updates detected')
-    prom_update_detected_ts = Gauge('dnsclient_update_detected_timestamp_seconds', 'Timestamp of update')
-    prom_update_request_status_code = Counter('dnsclient_request_status_code', 'Status code of request', ['status_code'])
+    prom_ipresolver_status = Counter('dnsclient_ipresolver_count_total', 'Amount of calls for external IP resolving', ['site', 'status_code'])
+    prom_ipresolver_failed = Counter('dnsclient_ipresolver_failed_total', 'Amount of failed external IP discoverings')
+    prom_last_check = Gauge('dnsclient_last_check_ts_seconds', 'Timestamp of the latest check for a new IP')
+    prom_update_detected = Counter('dnsclient_updates_detected_total', 'Amount of IP updates detected')
+    prom_update_detected_ts = Gauge('dnsclient_last_detected_update_ts_seconds', 'Timestamp of update')
+    prom_update_request_status_code = Counter('dnsclient_update_requests_total', 'Status code of request', ['status_code'])
 
     def __init__(self, dns_record, host, shared_secret, ip_providers, interval=1):
         if not dns_record.endswith("."):
@@ -57,7 +57,7 @@ class DyndnsUpdater:
         for provider in self.ip_providers:
             try:
                 external_ip, status_code = provider[1]()
-                self.prom_backends_status.labels(provider[0], status_code).inc()
+                self.prom_ipresolver_status.labels(provider[0], status_code).inc()
                 external_ip = external_ip.strip()
 
                 # before proceeding make sure this provider didn't provide garbage
@@ -68,7 +68,7 @@ class DyndnsUpdater:
             except Exception:
                 logging.debug(f"Failed to fetch information from provider {provider[0]}")
 
-        self.prom_backends_fetching_ip_failed.inc()
+        self.prom_ipresolver_failed.inc()
         logging.error("Giving up after all providers failed: Is the network down?")
 
     def has_update_occured(self, last_ip, fetched_ip):
