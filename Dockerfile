@@ -1,6 +1,6 @@
 FROM python:3.7-alpine
 
-RUN RUN addgroup -S toor && adduser -S toor -G toor
+RUN addgroup -S toor && adduser -S toor -G toor
 
 COPY requirements.txt /opt/dyndns/requirements.txt
 WORKDIR /opt/dyndns
