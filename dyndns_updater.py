@@ -17,7 +17,10 @@ class DyndnsUpdater:
     prom_update_request_status_code = Counter('dnsclient_request_status_code', 'Status code of request', ['status_code'])
 
     def __init__(self, dns_record, host, shared_secret, ip_providers, interval=1):
+        if not dns_record.endswith("."):
+            dns_record += "."
         self.dns_record = dns_record
+
         self.host = host
         self.shared_secret = shared_secret
         self.ip_providers = ip_providers
