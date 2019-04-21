@@ -30,7 +30,7 @@ class DyndnsUpdater:
             raise ValueError("No providers for determing IP address found. ")
 
     @staticmethod
-    def shuffle_providers(self, providers):
+    def shuffle_providers(providers):
         """ Makes sure we're using the providers more or less evenly. """
         random.shuffle(providers)
 
