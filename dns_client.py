@@ -39,7 +39,6 @@ def initialize():
     init_logging(args)
     ip_providers = get_ipv4_providers()
     start_http_server(args.promport)
-    initialize(args)
     DyndnsUpdater(args.record, args.url, args.shared_secret, ip_providers, args.interval).start()
 
 
