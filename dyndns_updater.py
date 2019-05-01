@@ -51,6 +51,11 @@ class DyndnsUpdater:
         self.prom_update_request_status_code.labels(response.status_code).inc()
         logging.debug(f"Response from remote: {response.status_code}")
 
+    @staticmethod
+    def is_valid_ipv4(ip):
+        # todo: check ip
+        return True
+
     def get_external_ip(self, backends):
         """ Iterate all IP providers until the first one gives a valid response.  """
         self.prom_last_check.set(int(time.time()))
@@ -62,7 +67,7 @@ class DyndnsUpdater:
 
                 # before proceeding make sure this provider didn't provide garbage
                 # todo: validate ipv4 and ipv6
-                if external_ip and status_code / 100 == 2:
+                if is_valid_ipv4(external_ip) is True and status_code / 100 == 2:
                     return external_ip
 
             except Exception:
