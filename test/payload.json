@@ -1,0 +1,49 @@
+{
+  "port": 8080,
+  "protocol": "http",
+  "stubs": [
+    {
+      "responses": [
+          {
+            "is": {
+                "body": "1.1.1.1"
+            },
+            "_behaviors": {
+                "repeat": 5
+            }
+        },
+        {
+            "is": {
+                "body": "1.1.1.2"
+            }
+        }
+      ],
+      "predicates": [
+        {
+          "equals": {
+            "method": "GET",
+            "path": "/test"
+          }
+        }
+      ]
+    },
+    {
+      "responses": [
+          { "is": { "body": "502", "statusCode": 502 }},
+          { "is": { "body": "404", "statusCode": 404 }},
+          { "is": { "body": "1.1.1.1" }, "_behaviors": { "wait": 10000}},
+          { "is": { "body": "403", "statusCode": 403 }},
+          { "is": { "body": "500", "statusCode": 500 }},
+          { "is": { "body": "1.1.1.1" }}
+      ],
+      "predicates": [
+        {
+          "matches": {
+            "path": "^/bla/.+"
+          }
+        }
+      ]
+    }
+  ]
+}
+
