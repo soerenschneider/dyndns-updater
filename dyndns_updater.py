@@ -17,17 +17,26 @@ class DyndnsUpdater:
     prom_update_request_status_code = Counter('dnsclient_update_requests_total', 'Status code of request', ['status_code'])
 
     def __init__(self, dns_record, host, shared_secret, ip_providers, interval=1):
+        if not dns_record:
+            raise ValueError("dns_record snot specified")
         if not dns_record.endswith("."):
             dns_record += "."
         self.dns_record = dns_record
 
+        if not host:
+            raise ValueError("host not specified")
         self.host = host
-        self.shared_secret = shared_secret
-        self.ip_providers = ip_providers
-        self.interval = interval
 
+        if not shared_secret:
+            raise ValueError("secret not specified")
+        self.shared_secret = shared_secret
+        
         if not ip_providers:
             raise ValueError("No providers for determing IP address found. ")
+        self.ip_providers = ip_providers
+        
+        self.interval = interval
+
 
     @staticmethod
     def shuffle_providers(providers):
@@ -39,15 +48,19 @@ class DyndnsUpdater:
         """ 'Sign' our request with the shared secret. """
         return hashlib.sha256(f"{host}{external_ip}{shared_secret}".encode('utf-8')).hexdigest()
 
-    def update(self, external_ip):
-        """ Notify the server about an updated IP address. """
+    def _build_request(self, external_ip):
         payload = dict()
         payload["validation_hash"] = self.hash_request(self.dns_record, external_ip, self.shared_secret)
         payload["dns_record"] = self.dns_record
         payload["public_ip"] = external_ip
+        return payload
 
+    def update(self, external_ip):
+        """ Notify the server about an updated IP address. """
+        payload = self._build_request(external_ip)
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         response = requests.post(self.host, data=json.dumps(payload), headers=headers)
+        
         self.prom_update_request_status_code.labels(response.status_code).inc()
         logging.debug(f"Response from remote: {response.status_code}")
 
@@ -59,6 +72,7 @@ class DyndnsUpdater:
     def get_external_ip(self, backends):
         """ Iterate all IP providers until the first one gives a valid response.  """
         self.prom_last_check.set(int(time.time()))
+        
         for provider in self.ip_providers:
             try:
                 external_ip, status_code = provider[1]()
