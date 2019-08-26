@@ -41,11 +41,15 @@ class DyndnsUpdater:
     @staticmethod
     def shuffle_providers(providers):
         """ Makes sure we're using the providers more or less evenly. """
-        random.shuffle(providers)
+        if providers:
+            random.shuffle(providers)
 
     @staticmethod
     def hash_request(host, external_ip, shared_secret):
         """ 'Sign' our request with the shared secret. """
+        if not host or not external_ip or not shared_secret:
+            raise ValueError("Uninitialized value provided")
+
         return hashlib.sha256(f"{host}{external_ip}{shared_secret}".encode('utf-8')).hexdigest()
 
     def _build_request(self, external_ip):
@@ -55,7 +59,7 @@ class DyndnsUpdater:
         payload["public_ip"] = external_ip
         return payload
 
-    def update(self, external_ip):
+    def _send_update(self, external_ip):
         """ Notify the server about an updated IP address. """
         payload = self._build_request(external_ip)
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
@@ -81,7 +85,7 @@ class DyndnsUpdater:
 
                 # before proceeding make sure this provider didn't provide garbage
                 # todo: validate ipv4 and ipv6
-                if is_valid_ipv4(external_ip) is True and status_code / 100 == 2:
+                if self.is_valid_ipv4(external_ip) is True and status_code < 400:
                     return external_ip
 
             except Exception:
@@ -89,10 +93,11 @@ class DyndnsUpdater:
 
         self.prom_ipresolver_failed.inc()
         logging.error("Giving up after all providers failed: Is the network down?")
+        return None
 
     def has_update_occured(self, last_ip, fetched_ip):
         """ Returns True when a IP change has been detected, otherwise False. """
-        if fetched_ip is not None and last_ip != fetched_ip:
+        if fetched_ip and last_ip != fetched_ip:
             logging.info(f"Detected new IP -> {fetched_ip}")
             self.prom_update_detected.inc()
             now = int(time.time())
@@ -111,7 +116,7 @@ class DyndnsUpdater:
 
                 if self.has_update_occured(last_ip, fetched_ip) is True:
                     last_ip = fetched_ip
-                    self.update(fetched_ip)
+                    self._send_update(fetched_ip)
 
                 time.sleep(60 * self.interval)
             except KeyboardInterrupt:
