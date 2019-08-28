@@ -27,6 +27,7 @@
         }
       ]
     },
+
     {
       "responses": [
           { "is": { "body": "502", "statusCode": 502 }},
@@ -40,6 +41,46 @@
         {
           "matches": {
             "path": "^/bla/.+"
+          }
+        }
+      ]
+    },
+
+    {
+      "responses": [
+          {
+            "is": {
+              "body": "nonono",
+              "statusCode": 403
+            }
+        }
+      ],
+      "predicates": [
+        {
+          "equals": {
+            "method": "POST"
+          }
+        }
+      ]
+    }, 
+
+    {
+      "responses": [
+          {
+            "is": {
+              "body": "okay",
+              "statusCode": 200
+            }
+        }
+      ],
+      "predicates": [
+        {
+          "equals": {
+            "method": "POST",
+            "headers": {
+              "Accept": "text/plain",
+              "Content-type": "application/json"
+            }
           }
         }
       ]
