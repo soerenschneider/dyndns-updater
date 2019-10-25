@@ -1,5 +1,14 @@
 stages:
+  - test
   - build_and_push
+
+test:unit:
+  image: python:3.7-slim-buster
+  stage: test
+  script:
+  - apt-get update && apt-get install -y make
+  - make venv-test
+  - make unittests
 
 build_and_push:
   image: docker:latest
