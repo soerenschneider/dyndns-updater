@@ -1,4 +1,4 @@
-tests: unittest
+tests: unittests
 
 .PHONY: venv
 venv:
@@ -19,6 +19,6 @@ clean:
 unittests:
 	venv/bin/python3 -m unittest tests/test_*.py
 
-integrationtest:
+integrationtests:
 	venv/bin/python3 -m unittest inttests/*test_*.py
 
