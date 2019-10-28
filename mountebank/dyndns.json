@@ -46,6 +46,39 @@
       ]
     },
 
+
+    {
+      "responses": [
+          {
+            "is": {
+              "body": "okay",
+              "statusCode": 200
+            }
+        }
+      ],
+      "predicates": [
+        {
+          "equals": {
+            "method": "POST",
+            "headers": {
+              "accept": "text/plain",
+              "content-type": "application/json"
+            }
+          }
+        },
+        {
+          "exists": { 
+              "body": { 
+                  "validation_hash": true,
+                  "dns_record": true,
+                  "public_ip": true
+              } 
+          },
+          "comment": "The given JSON key must exist"
+        }
+      ]
+    },
+
     {
       "responses": [
           {
@@ -62,29 +95,8 @@
           }
         }
       ]
-    }, 
-
-    {
-      "responses": [
-          {
-            "is": {
-              "body": "okay",
-              "statusCode": 200
-            }
-        }
-      ],
-      "predicates": [
-        {
-          "equals": {
-            "method": "POST",
-            "headers": {
-              "Accept": "text/plain",
-              "Content-type": "application/json"
-            }
-          }
-        }
-      ]
     }
+
   ]
 }
 
