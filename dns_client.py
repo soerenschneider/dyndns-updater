@@ -25,18 +25,27 @@ def get_ipv4_providers():
     return [f for f in getmembers(ipv4_providers, isfunction)]
 
 
-def init_logging(args):
+def init_logging(debug=False):
     loglevel = logging.INFO
-    if args.debug:
+    if debug:
         loglevel = logging.DEBUG
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=loglevel)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
+def print_config(args, ipv4_providers):
+    logging.info("Started using the following parameters")
+    logging.info("url=%s", args.url)
+    logging.info("record=%s", args.record)
+    logging.info("interval=%d", args.interval)
+    logging.info("prometheus_port=%d", args.promport)
+    logging.info("providers=%s", [x[0] for x in ipv4_providers])
+
+
 def initialize():
     args = read_config()
-    init_logging(args)
+    init_logging(args.debug)
     ip_providers = get_ipv4_providers()
     start_http_server(args.promport)
     DyndnsUpdater(args.record, args.url, args.shared_secret, ip_providers, args.interval).start()
