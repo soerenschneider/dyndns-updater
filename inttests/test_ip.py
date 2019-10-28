@@ -4,11 +4,13 @@ import logging
 from unittest import TestCase
 from dyndns_updater import DyndnsUpdater
 
+MOUNTEBANK = os.getenv("MOUNTEBANK_HOST", "localhost")
+
 def resolve_ip():
     return "1.1.1.1"
 
 class Test_Send(TestCase):
-    host = os.getenv("DYNDNS_MOUNTEBANK", "http://localhost:8080")
+    host = "http://" + MOUNTEBANK + ":8080"
 
     @staticmethod
     def setUpClass():
