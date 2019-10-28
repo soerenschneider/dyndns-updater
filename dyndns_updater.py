@@ -77,10 +77,13 @@ class DyndnsUpdater:
         payload["public_ip"] = external_ip
         return payload
 
+    @backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=5)
     def _send_update(self, payload):
         """ Notify the server about an updated IP address. """
         if not payload:
             raise ValueError("payload must not be empty")
+
+        logging.info("Sending update to remote server")
 
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         response = requests.post(self.host, data=json.dumps(payload), headers=headers)
@@ -173,7 +176,6 @@ class DyndnsUpdater:
             except KeyboardInterrupt:
                 logging.info("Received signal, quitting")
                 self.quit()
-                return
             except Exception as error:
-                time.sleep(60 * self.interval)
+                time.sleep(self.interval)
                 logging.error("Error while updating: %s", error)
