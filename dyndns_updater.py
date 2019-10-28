@@ -3,6 +3,7 @@ import hashlib
 import logging
 import json
 import ipaddress
+import time
 
 import backoff
 import requests
@@ -32,8 +33,10 @@ class DyndnsUpdater:
         self.ip_providers = ip_providers
         
         if not interval:
-            interval = 1
+            interval = 60
         self.interval = interval
+
+        self._quit = False
 
     def _set_dns_record(self, dns_record):
         """
@@ -147,7 +150,7 @@ class DyndnsUpdater:
         logging.debug("No update detected")
         return False
 
-    def perform(self, last_ip):
+    def perform_check(self, last_ip):
         self.shuffle_providers(self.ip_providers)
         fetched_ip = self.get_external_ip(self.ip_providers)
 
@@ -155,16 +158,21 @@ class DyndnsUpdater:
             payload = self._build_request(fetched_ip)
             self._send_update(payload)
             
-        return fetched_ip            
+        return fetched_ip
+
+    def quit(self):
+        self._quit = True
 
     def start(self):
+        logging.info("Started!")
         last_ip = None
-        while True:
+        while not self._quit:
             try:
-                last_ip = perform(last_ip)
-                time.sleep(60 * self.interval)
+                last_ip = self.perform_check(last_ip)
+                time.sleep(self.interval)
             except KeyboardInterrupt:
                 logging.info("Received signal, quitting")
+                self.quit()
                 return
             except Exception as error:
                 time.sleep(60 * self.interval)
