@@ -1,14 +1,15 @@
-import configargparse
 import logging
-
-from prometheus_client import start_http_server
 from inspect import getmembers, isfunction
 
+import configargparse
 import ipv4_providers
+
+from prometheus_client import start_http_server
 from dyndns_updater import DyndnsUpdater
 
+
 def read_config():
-    """ Argparse stuff happens here. """
+    """ Parse CLI args. """
     parser = configargparse.ArgumentParser(prog='dns_client')
 
     parser.add_argument('-u', '--url', dest="url", action="store", env_var="DNSCLIENT_URL", required=True)
@@ -16,16 +17,19 @@ def read_config():
     parser.add_argument('-s', '--secret', dest="shared_secret", action="store", env_var="DNSCLIENT_SECRET", required=True)
     parser.add_argument('--debug', dest="debug", action="store_true", env_var="DNSCLIENT_DEBUG", default=False)
     parser.add_argument('--prometheus_port', dest='promport', action="store", env_var="DNSCLIENT_PROMPORT", type=int, default=8000)
-    parser.add_argument('-i', '--interval', dest="interval", action="store", type=int, env_var="DNSCLIENT_INTERVAL", default=1)
+    parser.add_argument('-i', '--interval', dest="interval", action="store", type=int, env_var="DNSCLIENT_INTERVAL", default=60)
 
     return parser.parse_args()
 
 
 def get_ipv4_providers():
+    """ Return all configured IP providers """
+    logging.info("Loading IP providers")
     return [f for f in getmembers(ipv4_providers, isfunction)]
 
 
 def init_logging(debug=False):
+    """ Setup logging """
     loglevel = logging.INFO
     if debug:
         loglevel = logging.DEBUG
@@ -35,7 +39,8 @@ def init_logging(debug=False):
 
 
 def print_config(args, ipv4_providers):
-    logging.info("Started using the following parameters")
+    """ Print configuration after startup """
+    logging.info("Using the following parameters")
     logging.info("url=%s", args.url)
     logging.info("record=%s", args.record)
     logging.info("interval=%d", args.interval)
@@ -43,12 +48,24 @@ def print_config(args, ipv4_providers):
     logging.info("providers=%s", [x[0] for x in ipv4_providers])
 
 
+def prometheus_server(args):
+    if args.promport < 1:
+        logging.info("Not starting prometheus metrics endpoint")
+        return
+
+    logging.info("Start prometheus metrics endpoint at %d", args.promport)
+    start_http_server(args.promport)
+
+
 def initialize():
+    """ Start up """
     args = read_config()
     init_logging(args.debug)
     ip_providers = get_ipv4_providers()
-    start_http_server(args.promport)
-    DyndnsUpdater(args.record, args.url, args.shared_secret, ip_providers, args.interval).start()
+    print_config(args, ip_providers)
+    prometheus_server(args)
+    updater = DyndnsUpdater(args.record, args.url, args.shared_secret, ip_providers, args.interval)
+    updater.start()
 
 
 if __name__ == "__main__":
