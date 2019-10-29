@@ -117,7 +117,7 @@ class DyndnsUpdater:
 
         return provider_function()
 
-    def get_external_ip(self, backends):
+    def get_external_ip(self):
         """ Iterate all IP providers until the first one gives a valid response. """
         prom_last_check.set_to_current_time()
         
@@ -155,7 +155,7 @@ class DyndnsUpdater:
 
     def perform_check(self, last_ip):
         self.shuffle_providers(self.ip_providers)
-        fetched_ip = self.get_external_ip(self.ip_providers)
+        fetched_ip = self.get_external_ip()
 
         if self.has_update_occured(last_ip, fetched_ip) is True:
             payload = self._build_request(fetched_ip)
