@@ -6,7 +6,7 @@ test:unit:
   image: python:3.7-slim-buster
   stage: test
   script:
-  - apt-get update && apt-get install -y make
+  - apt-get update && apt-get install -y make gcc
   - make venv-test
   - make unittests
 
@@ -19,7 +19,7 @@ test:integration:
   - name: registry.gitlab.com/soerenschneider/mountebank-docker
     alias: mountebank
   script:
-  - apt-get update && apt-get -y install make curl
+  - apt-get update && apt-get -y install make curl gcc
   - curl -X POST --data @mountebank/dyndns.json mountebank:2525/imposters
   - make venv-test
   - make integrationtests
