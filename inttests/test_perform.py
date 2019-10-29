@@ -21,5 +21,5 @@ class Test_Send(TestCase):
 
     def test_is_ipv4_valid(self):
         updater = DyndnsUpdater(dns_record="my.record.tld.", host=self.host, shared_secret="secret", ip_providers=[("resolve_ip", resolve_ip)])
-        resolved_ip = updater.perform("1.1.1.0")
+        resolved_ip = updater.perform_check("1.1.1.0")
         self.assertEqual(ip, resolved_ip)
