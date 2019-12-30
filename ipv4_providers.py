@@ -32,5 +32,5 @@ def ip_sb():
 
 def myip_io():
     """ IP Provider for api-ipv4.ip.sb """
-    resp = requests.get('https://api4.my-ip.io')
+    resp = requests.get('https://api4.my-ip.io/ip')
     return resp.text, resp.status_code
