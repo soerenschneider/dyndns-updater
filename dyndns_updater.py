@@ -180,7 +180,7 @@ class DyndnsUpdater:
 
     def _read_from_persistence_backend(self) -> str:
         try:
-            self.persistence_backend.read()
+            return self.persistence_backend.read()
         except Exception as err:
             prom_backend_errors.labels("read", self.persistence_backend.get_plugin_name()).inc()
             logging.warning("Could not read old IP from persistence backend '%s': %s", self.persistence_backend.get_plugin_name(), err)
@@ -193,6 +193,8 @@ class DyndnsUpdater:
         logging.info("Started!")
 
         last_ip = self._read_from_persistence_backend()
+        logging.info("Read %s from persistence backend", last_ip)
+        
         while not self._quit:
             try:
                 last_ip = self.perform_check(last_ip)
