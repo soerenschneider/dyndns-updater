@@ -78,7 +78,7 @@ def initialize():
         dns_record=args.record, 
         host=args.url, 
         shared_secret=args.shared_secret, 
-        up_providers=ip_providers, 
+        ip_providers=ip_providers, 
         interval=args.interval, 
         persistence=persistence_provider)
     updater.start()
