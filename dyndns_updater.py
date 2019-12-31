@@ -74,14 +74,11 @@ class UpdateDetector:
             try:
                 external_ip, status_code = UpdateDetector.request_wrapper(provider[1])
                 prom_ipresolver_status.labels(provider[0], status_code).inc()
-                if not external_ip:
-                    return None
-
-                external_ip = external_ip.strip()
-
-                # before proceeding make sure this provider didn't provide garbage
-                if UpdateDetector.is_valid_ipv4(external_ip) is True and status_code < 400:
-                    return external_ip
+                if external_ip:
+                    external_ip = external_ip.strip()
+                    # before proceeding make sure this provider didn't provide garbage
+                    if UpdateDetector.is_valid_ipv4(external_ip) is True and status_code < 400:
+                        return external_ip
             except Exception:
                 logging.debug("Failed to fetch information from provider '%s'", provider[0])
 
