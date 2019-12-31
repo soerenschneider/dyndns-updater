@@ -173,7 +173,7 @@ class DyndnsUpdater:
     def _write_to_persistence_backend(self, new_ip: str) -> None:
         logging.debug("Writing IP to persistence backend '%s'", self.persistence_backend.get_plugin_name())
         try:
-            self.persistence_backend.write(fetched_ip)
+            self.persistence_backend.write(new_ip)
         except Exception as err:
             prom_backend_errors.labels("write", self.persistence_backend.get_plugin_name()).inc()
             logging.error("Could not write IP to persistence backend '%s': %s", self.persistence_backend.get_plugin_name(), err)
