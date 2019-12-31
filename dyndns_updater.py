@@ -16,6 +16,7 @@ prom_last_check = Gauge('dnsclient_last_check_ts_seconds', 'Timestamp of the lat
 prom_update_detected = Counter('dnsclient_updates_detected_total', 'Amount of IP updates detected')
 prom_update_detected_ts = Gauge('dnsclient_last_detected_update_ts_seconds', 'Timestamp of update')
 prom_update_request_status_code = Counter('dnsclient_update_requests_total', 'Status code of request', ['status_code'])
+prom_backend_errors = Counter('dnsclient_backend_errors_total', 'Errors with backend interaction', ['operation', 'backend_name'])
 
 class DyndnsUpdater:
     def __init__(self, dns_record, host, shared_secret, ip_providers, interval=None, persistence=None):
@@ -174,12 +175,14 @@ class DyndnsUpdater:
         try:
             self.persistence_backend.write(fetched_ip)
         except Exception as err:
+            prom_backend_errors.labels("write", self.persistence_backend.get_plugin_name()).inc()
             logging.error("Could not write IP to persistence backend '%s': %s", self.persistence_backend.get_plugin_name(), err)
 
     def _read_from_persistence_backend(self) -> str:
         try:
             self.persistence_backend.read()
         except Exception as err:
+            prom_backend_errors.labels("read", self.persistence_backend.get_plugin_name()).inc()
             logging.warning("Could not read old IP from persistence backend '%s': %s", self.persistence_backend.get_plugin_name(), err)
             return None
 
