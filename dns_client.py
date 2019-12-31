@@ -49,7 +49,7 @@ def print_config(args, ipv4_providers):
     logging.info("interval=%d", args.interval)
     logging.info("prometheus_port=%d", args.promport)
     if "file" in args:
-        logging.info("file=%d", args.file)
+        logging.info("file=%s", args.file)
     logging.info("providers=%s", [x[0] for x in ipv4_providers])
 
 
