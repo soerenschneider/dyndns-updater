@@ -14,12 +14,12 @@ def read_config():
     """ Parse CLI args. """
     parser = configargparse.ArgumentParser(prog='dns_client')
 
-    parser.add_argument('-u', '--url', dest="url", action="store", env_var="DNSCLIENT_URL", required=True)
-    parser.add_argument('-r', '--record', dest="record", action="store", env_var="DNSCLIENT_RECORD", required=True)
-    parser.add_argument('-s', '--secret', dest="shared_secret", action="store", env_var="DNSCLIENT_SECRET", required=True)
-    parser.add_argument('--debug', dest="debug", action="store_true", env_var="DNSCLIENT_DEBUG", default=False)
-    parser.add_argument('--prometheus_port', dest='promport', action="store", env_var="DNSCLIENT_PROMPORT", type=int, default=8000)
-    parser.add_argument('-i', '--interval', dest="interval", action="store", type=int, env_var="DNSCLIENT_INTERVAL", default=60)
+    parser.add_argument('-u', '--url', dest="url", action="store", env_var="DNSCLIENT_URL", required=True, help="The URL of the server component")
+    parser.add_argument('-r', '--record', dest="record", action="store", env_var="DNSCLIENT_RECORD", required=True, help="The full DNS record to update. It should end with a dot")
+    parser.add_argument('-s', '--secret', dest="shared_secret", action="store", env_var="DNSCLIENT_SECRET", required=True, "The secret that's associated with the appropriate record")
+    parser.add_argument('--debug', dest="debug", action="store_true", env_var="DNSCLIENT_DEBUG", default=False, help="Print debug messages")
+    parser.add_argument('--prometheus_port', dest='promport', action="store", env_var="DNSCLIENT_PROMPORT", type=int, default=0, help="Start a prometheus metrics server on the given port. To disable this feature, supply 0 as port. (Defaults to 0)")
+    parser.add_argument('-i', '--interval', dest="interval", action="store", type=int, env_var="DNSCLIENT_INTERVAL", default=60, help="The interval in seconds to check a random IP provider. Defaults to 60")
     parser.add_argument('-f', '--file', dest="file", action="store", env_var="DNSCLIENT_FILE", required=False, help="Save resolved IP to a file to preserve the status across service restarts.")
 
     return parser.parse_args()
