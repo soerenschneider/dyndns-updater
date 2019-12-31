@@ -8,6 +8,7 @@ import time
 import backoff
 import requests
 from prometheus_client import Counter, Gauge
+from persistence import Persistence
 
 prom_ipresolver_status = Counter('dnsclient_ipresolver_count_total', 'Amount of calls for external IP resolving', ['site', 'status_code'])
 prom_ipresolver_failed = Counter('dnsclient_ipresolver_failed_total', 'Amount of failed external IP discoverings')
@@ -17,7 +18,7 @@ prom_update_detected_ts = Gauge('dnsclient_last_detected_update_ts_seconds', 'Ti
 prom_update_request_status_code = Counter('dnsclient_update_requests_total', 'Status code of request', ['status_code'])
 
 class DyndnsUpdater:
-    def __init__(self, dns_record, host, shared_secret, ip_providers, interval=None):
+    def __init__(self, dns_record, host, shared_secret, ip_providers, interval=None, persistence=None):
         self._set_dns_record(dns_record)
 
         if not host:
@@ -35,6 +36,10 @@ class DyndnsUpdater:
         if not interval:
             interval = 60
         self.interval = interval
+
+        if not persistence:
+            persistence = Persistence()
+        self.persistence_backend = persistence
 
         self._quit = False
 
@@ -160,15 +165,31 @@ class DyndnsUpdater:
         if self.has_update_occured(last_ip, fetched_ip) is True:
             payload = self._build_request(fetched_ip)
             self._send_update(payload)
+            self._write_to_persistence_backend(fetched_ip)
             
         return fetched_ip
+
+    def _write_to_persistence_backend(self, new_ip: str) -> None:
+        logging.debug("Writing IP to persistence backend '%s'", self.persistence_backend.get_plugin_name())
+        try:
+            self.persistence_backend.write(fetched_ip)
+        except Exception as err:
+            logging.error("Could not write IP to persistence backend '%s': %s", self.persistence_backend.get_plugin_name(), err)
+
+    def _read_from_persistence_backend(self) -> str:
+        try:
+            self.persistence_backend.read()
+        except Exception as err:
+            logging.warning("Could not read old IP from persistence backend '%s': %s", self.persistence_backend.get_plugin_name(), err)
+            return None
 
     def quit(self):
         self._quit = True
 
     def start(self):
         logging.info("Started!")
-        last_ip = None
+
+        last_ip = self._read_from_persistence_backend()
         while not self._quit:
             try:
                 last_ip = self.perform_check(last_ip)

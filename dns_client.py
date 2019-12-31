@@ -7,6 +7,8 @@ import ipv4_providers
 from prometheus_client import start_http_server
 from dyndns_updater import DyndnsUpdater
 
+from persistence import FilePersistence
+
 
 def read_config():
     """ Parse CLI args. """
@@ -18,6 +20,7 @@ def read_config():
     parser.add_argument('--debug', dest="debug", action="store_true", env_var="DNSCLIENT_DEBUG", default=False)
     parser.add_argument('--prometheus_port', dest='promport', action="store", env_var="DNSCLIENT_PROMPORT", type=int, default=8000)
     parser.add_argument('-i', '--interval', dest="interval", action="store", type=int, env_var="DNSCLIENT_INTERVAL", default=60)
+    parser.add_argument('-f', '--file', dest="file", action="store", env_var="DNSCLIENT_FILE", required=False, help="Save resolved IP to a file to preserve the status across service restarts.")
 
     return parser.parse_args()
 
@@ -45,6 +48,7 @@ def print_config(args, ipv4_providers):
     logging.info("record=%s", args.record)
     logging.info("interval=%d", args.interval)
     logging.info("prometheus_port=%d", args.promport)
+    logging.info("file=%d", args.file)
     logging.info("providers=%s", [x[0] for x in ipv4_providers])
 
 
@@ -60,11 +64,22 @@ def prometheus_server(args):
 def initialize():
     """ Start up """
     args = read_config()
+
+    persistence_provider = None
+    if args.file:
+        persistence_provider = FilePersistence(args.file)
+
     init_logging(args.debug)
     ip_providers = get_ipv4_providers()
     print_config(args, ip_providers)
     prometheus_server(args)
-    updater = DyndnsUpdater(args.record, args.url, args.shared_secret, ip_providers, args.interval)
+    updater = DyndnsUpdater(
+        dns_record=args.record, 
+        host=args.url, 
+        shared_secret=args.shared_secret, 
+        up_providers=ip_providers, 
+        interval=args.interval, 
+        persistence=persistence_provider)
     updater.start()
 
 
