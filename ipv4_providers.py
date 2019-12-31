@@ -14,12 +14,6 @@ def ident_me():
     return resp.text, resp.status_code
 
 
-def seeip_org():
-    """ IP Provider for ipv4.seeip.org """
-    resp = requests.get('https://ip4.seeip.org/', timeout=TIMEOUT_SECONDS)
-    return resp.text, resp.status_code
-
-
 def whatismyipaddress_com():
     """ IP Provider for ipv4bot.whatismyipaddress.com """
     resp = requests.get('http://ipv4bot.whatismyipaddress.com/', timeout=TIMEOUT_SECONDS)
