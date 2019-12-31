@@ -79,8 +79,8 @@ class UpdateDetector:
                     # before proceeding make sure this provider didn't provide garbage
                     if UpdateDetector.is_valid_ipv4(external_ip) is True and status_code < 400:
                         return external_ip
-            except Exception:
-                logging.debug("Failed to fetch information from provider '%s'", provider[0])
+            except Exception as err:
+                logging.debug("Failed to fetch information from provider '%s': %s", provider[0], err)
 
         prom_ipresolver_failed.inc()
         logging.error("Giving up after all providers failed: Is the network down?")
