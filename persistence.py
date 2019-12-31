@@ -7,7 +7,7 @@ class Persistence:
     def read(self) -> str:
         return None
 
-    def get_plugin_name() -> str:
+    def get_plugin_name(self) -> str:
         return "Dummy"
 
 class FilePersistence(Persistence):
@@ -28,5 +28,5 @@ class FilePersistence(Persistence):
         with open(self.file_path, "r") as f:
             return f.read().replace("\n", "").strip()
     
-    def get_plugin_name() -> str:
+    def get_plugin_name(self) -> str:
         return "Filesystem"
