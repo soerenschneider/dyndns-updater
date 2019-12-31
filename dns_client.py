@@ -5,7 +5,8 @@ import configargparse
 import ipv4_providers
 
 from prometheus_client import start_http_server
-from dyndns_updater import DyndnsUpdater
+from dyndns_updater import UpdateDetector
+from notifier import UpdateNotifier
 
 from persistence import FilePersistence
 
@@ -72,16 +73,22 @@ def initialize():
 
     init_logging(args.debug)
     ip_providers = get_ipv4_providers()
+    
     print_config(args, ip_providers)
     prometheus_server(args)
-    updater = DyndnsUpdater(
-        dns_record=args.record, 
-        host=args.url, 
-        shared_secret=args.shared_secret, 
+
+    notifier = UpdateNotifier(
+        dns_record=args.record,
+        host=args.url,
+        shared_secret=args.shared_secret,
+    )
+
+    detector = UpdateDetector(
+        update_notifier=notifier,
         ip_providers=ip_providers, 
         interval=args.interval, 
         persistence=persistence_provider)
-    updater.start()
+    detector.start()
 
 
 if __name__ == "__main__":

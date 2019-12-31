@@ -1,4 +1,4 @@
-from dyndns_updater import DyndnsUpdater
+from notifier import UpdateNotifier
 from unittest import TestCase
 
 class TestRequests(TestCase):
@@ -7,8 +7,7 @@ class TestRequests(TestCase):
         dns_record = "my.dns.tld."
         host = "remote.host" 
         shared_secret = "secret" 
-        ip_providers = [""]
-        d = DyndnsUpdater(dns_record, host, shared_secret, ip_providers)
+        d = UpdateNotifier(dns_record, host, shared_secret)
         req = d._build_request("1.2.3.4")
         assert req is not None
         assert req['dns_record'] == dns_record
@@ -20,8 +19,8 @@ class TestRequests(TestCase):
         dns_record = "my.dns.tld."
         host = "remote.host" 
         shared_secret = "secret" 
-        ip_providers = [""]
-        d = DyndnsUpdater(dns_record, host, shared_secret, ip_providers)
+
+        d = UpdateNotifier(dns_record, host, shared_secret)
         with self.assertRaises(ValueError):
             d._build_request("")
 
@@ -29,8 +28,8 @@ class TestRequests(TestCase):
         dns_record = "my.dns.tld."
         host = "remote.host" 
         shared_secret = "secret" 
-        ip_providers = [""]
-        d = DyndnsUpdater(dns_record, host, shared_secret, ip_providers)
+        
+        d = UpdateNotifier(dns_record, host, shared_secret)
         with self.assertRaises(ValueError):
             d._build_request(None)
 
