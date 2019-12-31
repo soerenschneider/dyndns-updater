@@ -25,6 +25,7 @@ def ip_sb():
     resp = requests.get('https://api-ipv4.ip.sb/ip', timeout=TIMEOUT_SECONDS)
     return resp.text, resp.status_code
 
+
 def myip_io():
     """ IP Provider for api-ipv4.ip.sb """
     resp = requests.get('https://api4.my-ip.io/ip', timeout=TIMEOUT_SECONDS)
