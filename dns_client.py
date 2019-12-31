@@ -16,7 +16,7 @@ def read_config():
 
     parser.add_argument('-u', '--url', dest="url", action="store", env_var="DNSCLIENT_URL", required=True, help="The URL of the server component")
     parser.add_argument('-r', '--record', dest="record", action="store", env_var="DNSCLIENT_RECORD", required=True, help="The full DNS record to update. It should end with a dot")
-    parser.add_argument('-s', '--secret', dest="shared_secret", action="store", env_var="DNSCLIENT_SECRET", required=True, "The secret that's associated with the appropriate record")
+    parser.add_argument('-s', '--secret', dest="shared_secret", action="store", env_var="DNSCLIENT_SECRET", required=True, help="The secret that's associated with the appropriate record")
     parser.add_argument('--debug', dest="debug", action="store_true", env_var="DNSCLIENT_DEBUG", default=False, help="Print debug messages")
     parser.add_argument('--prometheus_port', dest='promport', action="store", env_var="DNSCLIENT_PROMPORT", type=int, default=0, help="Start a prometheus metrics server on the given port. To disable this feature, supply 0 as port. (Defaults to 0)")
     parser.add_argument('-i', '--interval', dest="interval", action="store", type=int, env_var="DNSCLIENT_INTERVAL", default=60, help="The interval in seconds to check a random IP provider. Defaults to 60")
@@ -48,7 +48,8 @@ def print_config(args, ipv4_providers):
     logging.info("record=%s", args.record)
     logging.info("interval=%d", args.interval)
     logging.info("prometheus_port=%d", args.promport)
-    logging.info("file=%d", args.file)
+    if "file" in args:
+        logging.info("file=%d", args.file)
     logging.info("providers=%s", [x[0] for x in ipv4_providers])
 
 
